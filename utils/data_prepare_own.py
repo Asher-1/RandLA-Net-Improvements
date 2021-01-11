@@ -1,10 +1,10 @@
-from sklearn.neighbors import KDTree
-from os.path import join, exists, dirname, abspath
+import sys
 import numpy as np
 import os, glob, pickle
-import sys
-
 from collections import Counter
+from sklearn.neighbors import KDTree
+from os.path import join, exists, dirname, abspath
+
 
 BASE_DIR = dirname(abspath(__file__))
 ROOT_DIR = dirname(BASE_DIR)
@@ -13,7 +13,7 @@ sys.path.append(ROOT_DIR)
 from helper_ply import write_ply
 from helper_tool import DataProcessing as DP
 
-grid_size = 0.02
+grid_size = 0.03
 dataset_path = '/media/yons/data/dataset/pointCloud/data/ownTrainedData/original_data'
 extend = '*.xyz'
 sub_pc_folder = join(dirname(dataset_path), 'input_{:.3f}'.format(grid_size))
@@ -33,6 +33,12 @@ for pc_path in glob.glob(join(dataset_path, extend)):
         continue
 
     pc = DP.load_pc_semantic3d(pc_path, header=None, delim_whitespace=True)
+    col = pc[0, 3]
+    print(pc[:, 3:6])
+    if col < 1:
+        print("find invalid file format!!!")
+        exit(0)
+
     # check if label exists
     label_path = pc_path[:-4] + '.labels'
     if exists(label_path):

@@ -72,7 +72,44 @@ class ConfigSemantic3D:
     num_layers = 5  # Number of layers
     num_points = 65536  # Number of input points
     num_classes = 19  # Number of valid classes default = 8
-    sub_grid_size = 0.02  # preprocess_parameter default = 0.06
+    sub_grid_size = 0.03  # preprocess_parameter default = 0.06, best = 0.03
+
+    batch_size = 4  # batch_size during training default = 4
+    val_batch_size = 16  # 16  # batch_size during validation and test
+    test_steps = 50
+    test_batch_size = 16
+    train_steps = 500  # Number of steps per epochs
+    val_steps = 100  # Number of validation steps per epoch
+
+    sub_sampling_ratio = [4, 4, 4, 4, 2]  # sampling ratio of random sampling at each layer
+    d_out = [16, 64, 128, 256, 512]  # feature dimension
+
+    noise_init = 3.5  # noise initial parameter
+    max_epoch = 100  # maximum epoch during training
+    learning_rate = 1e-2  # initial learning rate
+    lr_decays = {i: 0.95 for i in range(0, 500)}  # decay rate of learning rate
+
+    train_sum_dir = 'train_log'
+    saving = True
+    fine_tune = True
+    saving_path = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D'
+
+    augment_scale_anisotropic = True
+    augment_symmetries = [True, False, False]
+    augment_rotation = 'vertical'
+    augment_scale_min = 0.8
+    augment_scale_max = 1.2
+    augment_noise = 0.001
+    augment_occlusion = 'none'
+    augment_color = 0.8
+
+
+class ConfigSemantic3DBack:
+    k_n = 16  # KNN
+    num_layers = 5  # Number of layers
+    num_points = 65536  # Number of input points
+    num_classes = 19  # Number of valid classes default = 8
+    sub_grid_size = 0.06  # preprocess_parameter default = 0.06
 
     batch_size = 4  # batch_size during training default = 4
     val_batch_size = 16  # 16  # batch_size during validation and test
@@ -295,9 +332,6 @@ class DataProcessing:
             num_per_class = np.array([6352628, 1881335, 3351389, 135650, 1132024, 282850, 3384, 102379, 357589, 20374,
                                       332435, 42973, 164957, 8626, 7962, 11651, 64765, 26884, 42479],
                                      dtype=np.int32)
-            # num_per_class = np.array([1225106, 387786, 1366663, 103601, 408062, 48193, 1922, 39371, 53207, 3527,
-            #                           82657, 7528, 26121, 1381, 1582, 2307, 12642, 4219, 6593],
-            #                          dtype=np.int32)
             # num_per_class = np.array([5181602, 5012952, 6830086, 1311528, 10476365, 946982, 334860, 269353],
             #                          dtype=np.int32)
         elif dataset_name is 'SemanticKITTI':

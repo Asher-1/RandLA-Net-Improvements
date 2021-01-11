@@ -80,19 +80,25 @@ def inference(need_sample, use_votes):
         print("Generate labels: {}".format(label_file_name))
 
 
-def visualization():
+def visualization(extend):
     cloud_names = [file_name[:-7] for file_name in os.listdir(TEST_PATH) if file_name[-7:] == '.labels']
     scene_names = []
     label_names = []
     for pc_name in cloud_names:
-        if os.path.exists(os.path.join(TEST_PATH, pc_name + '.ply')):
-            scene_names.append(os.path.join(TEST_PATH, pc_name + '.ply'))
+        if os.path.exists(os.path.join(TEST_PATH, pc_name + extend)):
+            scene_names.append(os.path.join(TEST_PATH, pc_name + extend))
             label_names.append(os.path.join(TEST_PATH, pc_name + '.labels'))
 
     for i in range(len(scene_names)):
         print('scene:', scene_names[i])
-        data = read_ply(scene_names[i])
-        data = np.vstack((data['x'], data['y'], data['z'], data['red'], data['green'], data['blue'])).T
+        if extend == '.ply':
+            data = read_convert_to_array(scene_names[i])
+        elif extend == '.xyz':
+            data = DP.load_pc_semantic3d(scene_names[i], header=None, delim_whitespace=True)
+        else:
+            print("unsupported extend : {}".format(extend))
+            continue
+
         pc = data[:, :6].astype(np.float32)
         print('scene point number', pc.shape)
         sem_pred = DP.load_label_semantic3d(label_names[i])
@@ -106,15 +112,19 @@ def visualization():
 
 
 if __name__ == '__main__':
-    MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-29501'
+    # MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-29501'
+    MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-42001'
+    # MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-43501' # 0.02
+    # MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-35501' # 0.06
+    # MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-28001'  # 0.04
     DATA_PATH = '/media/yons/data/dataset/pointCloud/data/ownTrainedData'
-    TEST_PATH = os.path.join(DATA_PATH, 'test')
-    extend = '.ply'
+    TEST_PATH = os.path.join(DATA_PATH, 'test/test_file')
+    extend = '.xyz'
 
     USE_VOTES = False
     NEED_SAMPLE = True
 
-    MODE = 'inference'  # 'inference' 'visualization'
+    MODE = 'visualization'  # 'inference' 'visualization'
 
     GPU = 1
     os.environ['CUDA_VISIBLE_DEVICES'] = str(GPU)
@@ -127,6 +137,4 @@ if __name__ == '__main__':
         end = time.time()
         DP.log_string('total cost time {:.1f} s\n'.format(end - start), log_out)
     elif MODE == 'visualization':
-        visualization()
-
-
+        visualization(extend)

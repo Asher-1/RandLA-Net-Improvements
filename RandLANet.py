@@ -26,6 +26,8 @@ class Network:
                 self.saving_path = self.config.saving_path
             makedirs(self.saving_path) if not exists(self.saving_path) else None
 
+        self.snapshot_directory = join(self.saving_path, 'snapshots')
+
         with tf.variable_scope('inputs'):
             self.inputs = dict()
             num_layers = self.config.num_layers
@@ -100,6 +102,13 @@ class Network:
         self.train_writer = tf.summary.FileWriter(config.train_sum_dir, self.sess.graph)
         self.sess.run(tf.global_variables_initializer())
 
+        if self.config.fine_tune:
+            ckpt = tf.train.get_checkpoint_state(self.snapshot_directory + "/")
+            if ckpt and ckpt.model_checkpoint_path:
+                self.saver.restore(self.sess, ckpt.model_checkpoint_path)
+                message = 'model restore from {}'
+                log_out(message.format(ckpt.model_checkpoint_path), self.Log_file)
+
     def inference(self, inputs, is_training):
 
         d_out = self.config.d_out
@@ -170,10 +179,9 @@ class Network:
                 m_iou = self.evaluate(dataset)
                 if m_iou > max(self.mIou_list):
                     # Save the best model
-                    snapshot_directory = join(self.saving_path, 'snapshots')
-                    makedirs(snapshot_directory) if not exists(snapshot_directory) else None
-                    self.saver.save(self.sess, snapshot_directory + '/snap', global_step=self.training_step)
-                    print("best model has been saved to {}".format(snapshot_directory + '/snap'))
+                    makedirs(self.snapshot_directory) if not exists(self.snapshot_directory) else None
+                    self.saver.save(self.sess, self.snapshot_directory + '/snap', global_step=self.training_step)
+                    print("best model has been saved to {}".format(self.snapshot_directory + '/snap'))
                 self.mIou_list.append(m_iou)
                 log_out('Best m_IoU is: {:5.3f}'.format(max(self.mIou_list)), self.Log_file)
 

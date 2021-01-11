@@ -9,9 +9,9 @@ import tensorflow as tf
 import numpy as np
 import pickle, argparse, os
 
-MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-29501'
+MODEL_PATH = '/media/yons/data/dataset/pointCloud/RandLA_net/models/Semantic3D/snapshots/snap-43501'
 DATA_PATH = '/media/yons/data/dataset/pointCloud/data/ownTrainedData'
-MODE = 'test'  # 'train' 'None' 'test'
+MODE = 'train'  # 'train' 'None' 'test'
 GPU = '1'
 
 extend = '.xyz'
@@ -52,8 +52,8 @@ class Semantic3D:
         self.sub_pc_folder = join(self.path, 'input_{:.3f}'.format(cfg.sub_grid_size))
 
         # Following KPConv to do the train-validation split
-        self.all_splits = [0, 1, 4, 5, 3, 4, 3, 0, 1, 2, 3, 4, 2, 0, 5]
-        self.val_split = 4
+        self.all_splits = [0, 1, 4, 5, 3, 4, 3, 0, 1, 2, 3, 4, 2, 0, 5, 2, 3, 4, 2, 0, 5, 4, 5, 3, 4, 3, 0]
+        self.val_split = 1
 
         # Initial training-validation-testing files
         self.train_files = []
@@ -70,6 +70,8 @@ class Semantic3D:
         self.test_files = np.sort(self.test_files)
 
         for i, file_path in enumerate(self.train_files):
+            if i >= len(self.all_splits):
+                break
             if self.all_splits[i] == self.val_split:
                 self.val_files.append(file_path)
 
@@ -96,9 +98,13 @@ class Semantic3D:
             '4_14_local.ply': '4_14_local_result.labels',
             'bildstein_station1_xyz_rgb.ply': 'bildstein_station1_xyz_rgb_result.labels',
             'bildstein_station3_xyz_rgb.ply': 'bildstein_station3_xyz_rgb_result.labels',
-            'ckeda_local.ply': 'ckeda_local_result.labels',
             'sg27_station10_rgb.ply': 'sg27_station10_rgb_result.labels',
             'shinan1_9_aa.ply': 'shinan1_9_aa_result.labels',
+            'keda_local.ply': 'keda_local_result.labels',
+            '7_7_1_local_cut.ply': '7_7_1_local_cut_result.labels',
+            '7_7_2_local_cut.ply': '7_7_2_local_cut_result.labels',
+            '8_18_1_local.ply': '8_18_1_local_result.labels',
+            '8_18_2_local.ply': '8_18_2_local_result.labels',
             'stgallencathedral_station1_rgb.ply': 'stgallencathedral_station1_rgb_result.labels',
         }
 
